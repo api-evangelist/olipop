@@ -1,0 +1,186 @@
+generated: '2026-07-31'
+method: searched
+source: https://drinkolipop.com/llms.txt
+also_from:
+- https://drinkolipop.com/agents.md
+- https://drinkolipop.com/robots.txt
+- https://ucp.dev/2026-04-08/services/shopping/mcp.openrpc.json
+notes: >-
+  Unusually for this pipeline, the agentic-access contract here is SEARCHED rather than generated: OLIPOP
+  actually publishes agent access guidance on its own domain, in three mutually consistent places
+  (/llms.txt, /agents.md and comments at the top of /robots.txt). The operations classified below are the
+  UCP shopping tools its merchant profile declares, and the escalation rules are the provider's own stated
+  rules rather than our recommendations. Where a field is our classification rather than a published claim,
+  it is marked derived_classification.
+policy_summary:
+  agents_welcome: true
+  agent_identity_required: true
+  identity_mechanism: UCP-Agent profile URL (meta["ucp-agent"].profile)
+  read_without_enrollment: true
+  purchase_without_human_approval: false
+  preferred_agent_path: UCP/MCP at https://drinkolipop.com/api/ucp/mcp
+  recommended_alternative: https://shop.app/SKILL.md (Shop skill / Shop Pay, for personal shopping agents)
+  prohibited:
+  - scripted checkout form fills
+  - browser automation that finalizes payment
+  - end-to-end agent flows that place an order without contemporaneous human approval
+  - screen-scraping the storefront where the UCP/MCP or Shop skill path is available (discouraged, not
+    prohibited)
+  published_verbatim_rule: >-
+    "Checkout requires human approval. Agents must not complete payment without explicit buyer consent. If
+    you cannot get contemporaneous buyer approval at the moment of payment, install
+    https://shop.app/SKILL.md and route the purchase through Shop Pay instead."
+summary:
+  operations: 13
+  by_action_class:
+    connected: 5
+    acting: 8
+  by_consequence:
+    read: 5
+    write: 5
+    physical: 3
+  human_in_the_loop_required: 1
+  audit_required: 8
+  idempotency_required: 3
+operations:
+- operation: search_catalog
+  surface: ucp-mcp
+  action_class: connected
+  consequence: read
+  scope: catalog:read
+  audit: optional
+  human_in_the_loop: not-required
+  token_ttl_max_seconds: 3600
+- operation: lookup_catalog
+  surface: ucp-mcp
+  action_class: connected
+  consequence: read
+  scope: catalog:read
+  audit: optional
+  human_in_the_loop: not-required
+  token_ttl_max_seconds: 3600
+- operation: get_product
+  surface: ucp-mcp
+  action_class: connected
+  consequence: read
+  scope: catalog:read
+  audit: optional
+  human_in_the_loop: not-required
+  token_ttl_max_seconds: 3600
+- operation: get_cart
+  surface: ucp-mcp
+  action_class: connected
+  consequence: read
+  scope: cart:read
+  audit: optional
+  human_in_the_loop: not-required
+  token_ttl_max_seconds: 3600
+- operation: get_checkout
+  surface: ucp-mcp
+  action_class: connected
+  consequence: read
+  scope: checkout:read
+  audit: optional
+  human_in_the_loop: not-required
+  token_ttl_max_seconds: 3600
+- operation: get_order
+  surface: ucp-mcp
+  action_class: connected
+  consequence: read
+  scope: order:read
+  audit: required
+  human_in_the_loop: not-required
+  token_ttl_max_seconds: 3600
+  note: returns buyer PII (addresses, contact details); treat as sensitive read
+- operation: create_cart
+  surface: ucp-mcp
+  action_class: acting
+  consequence: write
+  scope: cart:write
+  audit: required
+  human_in_the_loop: not-required
+  token_ttl_max_seconds: 900
+- operation: update_cart
+  surface: ucp-mcp
+  action_class: acting
+  consequence: write
+  scope: cart:write
+  audit: required
+  human_in_the_loop: not-required
+  token_ttl_max_seconds: 900
+- operation: cancel_cart
+  surface: ucp-mcp
+  action_class: acting
+  consequence: write
+  scope: cart:write
+  audit: required
+  human_in_the_loop: not-required
+  idempotency_key: required
+  token_ttl_max_seconds: 900
+- operation: create_checkout
+  surface: ucp-mcp
+  action_class: acting
+  consequence: write
+  scope: checkout:write
+  audit: required
+  human_in_the_loop: not-required
+  token_ttl_max_seconds: 900
+- operation: update_checkout
+  surface: ucp-mcp
+  action_class: acting
+  consequence: write
+  scope: checkout:write
+  audit: required
+  human_in_the_loop: not-required
+  token_ttl_max_seconds: 900
+  note: sets shipping address and delivery method; carries buyer PII
+- operation: cancel_checkout
+  surface: ucp-mcp
+  action_class: acting
+  consequence: physical
+  scope: checkout:write
+  audit: required
+  human_in_the_loop: recommended
+  idempotency_key: required
+  token_ttl_max_seconds: 300
+  note: derived_classification - cancelling a checkout is money-adjacent and irreversible from the agent's
+    side; the provider does not classify it explicitly
+- operation: complete_checkout
+  surface: ucp-mcp
+  action_class: acting
+  consequence: physical
+  scope: checkout:complete
+  audit: required
+  human_in_the_loop: required
+  purpose_required: true
+  idempotency_key: required
+  token_ttl_max_seconds: 300
+  note: PUBLISHED RULE, not a recommendation - the provider states that payment may not be completed
+    without explicit contemporaneous buyer consent
+read_only_surface:
+  description: Endpoints an agent may use with no enrollment, identity or token at all.
+  operations:
+  - 'GET /products.json'
+  - 'GET /products/{handle}.json'
+  - 'GET /collections/{handle}/products.json'
+  - 'GET /search?q={query}&type=product'
+  - 'GET /collections/all'
+  - 'GET /sitemap.xml'
+  action_class: connected
+  consequence: read
+  audience: null
+  source: https://drinkolipop.com/llms.txt
+rate_limiting:
+  scope: per IP
+  signal: HTTP 429
+  guidance: back off on 429 responses
+  published_limit: not disclosed
+buyer_context_required:
+- context.address_country
+- context.currency
+x-evidence:
+  fetched: '2026-07-31'
+  probes:
+  - {url: 'https://drinkolipop.com/llms.txt', http_status: 200}
+  - {url: 'https://drinkolipop.com/agents.md', http_status: 200}
+  - {url: 'https://drinkolipop.com/robots.txt', http_status: 200}

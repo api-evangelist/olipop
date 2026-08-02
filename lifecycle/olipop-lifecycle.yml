@@ -1,0 +1,64 @@
+generated: '2026-07-31'
+method: searched
+source: https://drinkolipop.com/.well-known/ucp
+notes: >-
+  OLIPOP publishes no versioning or deprecation policy of its own. Both machine-readable surfaces on its
+  domain do carry real, discoverable version lifecycles, captured here from live probes: UCP negotiates a
+  dated protocol version through the merchant profile, and the Storefront GraphQL API exposes its own
+  supported/unsupported version list through the publicApiVersions query.
+versioning:
+- surface: UCP / MCP commerce
+  scheme: dated protocol version, negotiated via discovery
+  current: '2026-04-08'
+  supported:
+  - version: '2026-04-08'
+    profile: https://olipop-store.myshopify.com/.well-known/ucp/2026-04-08
+    status: latest stable
+  - version: '2026-01-23'
+    profile: https://olipop-store.myshopify.com/.well-known/ucp/2026-01-23
+    status: supported
+  docs: https://drinkolipop.com/agents.md
+  source: https://drinkolipop.com/.well-known/ucp
+- surface: Storefront GraphQL
+  scheme: dated version in the URL path (/api/{version}/graphql.json)
+  in_use_by_this_catalog_entry: '2025-07'
+  latest: '2026-07'
+  discovery_query: '{ publicApiVersions { handle displayName supported } }'
+  versions:
+  - {handle: '2025-10', supported: true}
+  - {handle: '2026-01', supported: true}
+  - {handle: '2026-04', supported: true}
+  - {handle: '2026-07', supported: true, note: Latest}
+  - {handle: '2026-10', supported: false, note: Release candidate}
+  - {handle: unstable, supported: false}
+  probed: '2026-07-31'
+  source: https://drinkolipop.com/api/2025-07/graphql.json
+deprecation:
+  policy_url: null
+  sunset_header: false
+  in_spec_deprecation: true
+  mechanism: >-
+    The Storefront GraphQL schema marks retiring fields and enum values with the @deprecated directive and a
+    reason string, so deprecation is machine-readable in the contract even though no written policy page is
+    published on the OLIPOP domain. Storefront API versions that fall out of the publicApiVersions supported
+    list stop being served.
+  source: graphql/olipop-storefront.graphql
+status_page:
+  first_party: null
+  note: >-
+    OLIPOP publishes no status page. The storefront and both API surfaces are hosted by Shopify, whose
+    platform status page is https://status.shopify.com/, but that is Shopify's page and not an OLIPOP
+    commitment, so no StatusPage pointer is wired into apis.yml.
+sla:
+  url: null
+  uptime_target: null
+change_log:
+  first_party: null
+  note: no dated changelog for any OLIPOP surface; UCP and Storefront GraphQL changes are announced by the
+    protocol and platform owners respectively
+deprecated_operations: []
+x-evidence:
+  fetched: '2026-07-31'
+  probes:
+  - {url: 'https://drinkolipop.com/.well-known/ucp', http_status: 200}
+  - {url: 'https://drinkolipop.com/api/2025-07/graphql.json', method: POST, query: publicApiVersions, http_status: 200}

@@ -1,0 +1,85 @@
+generated: '2026-07-31'
+method: searched
+source: https://drinkolipop.com/.well-known/openid-configuration
+docs: https://drinkolipop.com/agents.md
+notes: >-
+  OLIPOP publishes no OpenAPI, so this profile was assembled from live probes rather than derived from
+  securitySchemes. Three distinct auth models coexist on the drinkolipop.com host: an unauthenticated
+  read-only JSON/catalog surface, a token-bearing Storefront GraphQL surface, and an agent-identity model
+  (UCP-Agent profile) in front of the MCP commerce endpoint - with OIDC underneath for customer accounts.
+summary:
+  types: [none, apiKey, oauth2, openIdConnect, agent-profile]
+  api_key_in: [header]
+  oauth2_flows: [authorizationCode]
+  pkce: [S256]
+schemes:
+- name: publicRead
+  type: none
+  description: Product, collection, search, sitemap and policy JSON/HTML require no credential at all.
+  applies_to:
+  - /products.json
+  - /products/{handle}.json
+  - /collections/{handle}/products.json
+  - /search?q={query}&type=product
+  - /sitemap.xml
+  source: https://drinkolipop.com/llms.txt
+- name: storefrontAccessToken
+  type: apiKey
+  in: header
+  parameter_name: X-Shopify-Storefront-Access-Token
+  description: >-
+    Public storefront access token for the Shopify Storefront GraphQL API. Schema introspection at
+    https://drinkolipop.com/api/2025-07/graphql.json answered anonymously during this probe; data reads and
+    all mutations require the token.
+  applies_to: [https://drinkolipop.com/api/2025-07/graphql.json]
+  source: https://shopify.dev/docs/api/storefront
+- name: customerAccessToken
+  type: apiKey
+  in: body
+  parameter_name: customerAccessToken
+  description: >-
+    Per-customer token minted by the customerAccessTokenCreate mutation and passed as an argument to
+    customer-scoped queries and mutations in the Storefront GraphQL schema.
+  applies_to: [https://drinkolipop.com/api/2025-07/graphql.json]
+  source: graphql/olipop-storefront.graphql
+- name: shopifyCustomerAccounts
+  type: openIdConnect
+  openIdConnectUrl: https://drinkolipop.com/.well-known/openid-configuration
+  description: >-
+    Shopify customer accounts OIDC provider scoped to this shop (shop id 3466100806). Also advertised as an
+    RFC 8414 OAuth 2.0 authorization server at /.well-known/oauth-authorization-server with a byte-identical
+    document.
+  issuer: https://shopify.com/authentication/3466100806
+  authorization_endpoint: https://shopify.com/authentication/3466100806/oauth/authorize
+  token_endpoint: https://shopify.com/authentication/3466100806/oauth/token
+  end_session_endpoint: https://shopify.com/authentication/3466100806/logout
+  jwks_uri: https://shopify.com/authentication/3466100806/.well-known/jwks.json
+  flows:
+  - flow: authorizationCode
+    grant_types: [authorization_code, refresh_token, 'urn:ietf:params:oauth:grant-type:jwt-bearer']
+    code_challenge_methods: [S256]
+    token_endpoint_auth_methods: [client_secret_basic]
+  id_token_signing_alg: [RS256]
+  claims: [iss, sub, aud, exp, iat, nonce, sid, email, email_verified]
+  scopes: [openid, email, 'customer-account-api:full', 'customer-account-mcp-api:full']
+  source: well-known/olipop-openid-configuration.json
+- name: ucpAgentProfile
+  type: agent-profile
+  in: header
+  parameter_name: UCP-Agent
+  description: >-
+    The UCP/MCP commerce endpoint does not authenticate with a bearer token; it requires the CALLING
+    PLATFORM to identify itself with a URL to its own UCP profile document, carried as
+    meta["ucp-agent"].profile in the JSON-RPC params or as the UCP-Agent HTTP header. An anonymous call is
+    rejected with JSON-RPC -32001 / invalid_profile_url before any tool is exposed. Payment authorization
+    is separate again and rides the declared payment handlers (Google Pay, Shopify Card, Shop Pay) with a
+    mandatory human buyer-approval step.
+  applies_to: [https://drinkolipop.com/api/ucp/mcp]
+  source: https://ucp.dev/2026-04-08/services/shopping/mcp.openrpc.json
+x-evidence:
+  fetched: '2026-07-31'
+  probes:
+  - {url: 'https://drinkolipop.com/.well-known/openid-configuration', http_status: 200}
+  - {url: 'https://drinkolipop.com/.well-known/oauth-authorization-server', http_status: 200}
+  - {url: 'https://drinkolipop.com/api/2025-07/graphql.json', method: POST, http_status: 200, note: anonymous introspection succeeded}
+  - {url: 'https://drinkolipop.com/api/ucp/mcp', method: POST, http_status: 422, note: anonymous tools/list rejected}

@@ -1,0 +1,230 @@
+generated: '2026-07-31'
+method: derived
+source: graphql/olipop-storefront.graphql
+notes: >-
+  Entity-relationship graph derived from the Storefront GraphQL schema introspected live from
+  https://drinkolipop.com/api/2025-07/graphql.json. Relationships were read from object-typed fields and
+  Connection wrappers in the introspected schema; scalar/money/SEO value objects are omitted. There is no
+  OpenAPI to derive from, and the UCP cart/checkout/order schemas are hosted by ucp.dev rather than by
+  OLIPOP, so they are referenced but not restated here.
+schema_stats:
+  types: 422
+  objects: 260
+  query_fields: 35
+  mutation_fields: 41
+identifiers:
+  scheme: Shopify global ID (GID)
+  form: gid://shopify/<Type>/<numeric id>
+  also: >-
+    Products, collections, blogs, articles and pages additionally carry a URL-safe "handle" used by the
+    *ByHandle queries and by the unauthenticated JSON endpoints (/products/{handle}.json)
+  interface: 'Node (id: ID!)'
+domains:
+- name: catalog
+  entities: [Product, ProductVariant, Collection, ProductOption, SelectedOption, Image, Media,
+    TaxonomyCategory, SellingPlan, SellingPlanGroup, QuantityRule, StoreAvailability]
+- name: cart
+  entities: [Cart, BaseCartLine, CartLine, ComponentizableCartLine, CartCost, CartBuyerIdentity,
+    CartDelivery, CartDeliveryGroup, CartDeliveryOption, CartDiscountCode, AppliedGiftCard, Attribute]
+- name: order
+  entities: [Order, OrderLineItem, Fulfillment, FulfillmentLineItem, DiscountApplication,
+    DiscountAllocation]
+- name: customer
+  entities: [Customer, CustomerAccessToken, MailingAddress]
+- name: content
+  entities: [Blog, Article, ArticleAuthor, Comment, Page, Menu, MenuItem, Metaobject, MetaobjectField]
+- name: shop
+  entities: [Shop, Brand, Domain, ShopPolicy, PaymentSettings, Localization, Country, Currency, Language,
+    Location]
+- name: extensibility
+  entities: [Metafield, MetafieldReference]
+relationships:
+- from: Product
+  to: ProductVariant
+  kind: has_many
+  via: variants
+- from: Product
+  to: ProductVariant
+  kind: has_one
+  via: selectedOrFirstAvailableVariant
+- from: ProductVariant
+  to: Product
+  kind: belongs_to
+  via: product
+- from: Product
+  to: Collection
+  kind: has_many
+  via: collections
+- from: Collection
+  to: Product
+  kind: has_many
+  via: products
+- from: Product
+  to: Image
+  kind: has_many
+  via: images
+- from: Product
+  to: Image
+  kind: has_one
+  via: featuredImage
+- from: Product
+  to: ProductOption
+  kind: has_many
+  via: options
+- from: Product
+  to: SellingPlanGroup
+  kind: has_many
+  via: sellingPlanGroups
+- from: SellingPlanGroup
+  to: SellingPlan
+  kind: has_many
+  via: sellingPlans
+- from: ProductVariant
+  to: SellingPlanAllocation
+  kind: has_many
+  via: sellingPlanAllocations
+- from: ProductVariant
+  to: StoreAvailability
+  kind: has_many
+  via: storeAvailability
+- from: Cart
+  to: BaseCartLine
+  kind: has_many
+  via: lines
+- from: CartLine
+  to: ProductVariant
+  kind: belongs_to
+  via: merchandise
+  note: merchandise is the Merchandise union, whose only member in this schema is ProductVariant
+- from: Cart
+  to: CartDeliveryGroup
+  kind: has_many
+  via: deliveryGroups
+- from: CartDeliveryGroup
+  to: MailingAddress
+  kind: has_one
+  via: deliveryAddress
+- from: CartDeliveryGroup
+  to: CartDeliveryOption
+  kind: has_many
+  via: deliveryOptions
+- from: CartDeliveryGroup
+  to: BaseCartLine
+  kind: has_many
+  via: cartLines
+- from: Cart
+  to: CartBuyerIdentity
+  kind: has_one
+  via: buyerIdentity
+- from: CartBuyerIdentity
+  to: Customer
+  kind: belongs_to
+  via: customer
+- from: Cart
+  to: CartDiscountCode
+  kind: has_many
+  via: discountCodes
+- from: Cart
+  to: AppliedGiftCard
+  kind: has_many
+  via: appliedGiftCards
+- from: Customer
+  to: Order
+  kind: has_many
+  via: orders
+- from: Customer
+  to: MailingAddress
+  kind: has_many
+  via: addresses
+- from: Customer
+  to: MailingAddress
+  kind: has_one
+  via: defaultAddress
+- from: Order
+  to: OrderLineItem
+  kind: has_many
+  via: lineItems
+- from: Order
+  to: MailingAddress
+  kind: has_one
+  via: shippingAddress
+- from: Order
+  to: MailingAddress
+  kind: has_one
+  via: billingAddress
+- from: Order
+  to: Fulfillment
+  kind: has_many
+  via: successfulFulfillments
+- from: Order
+  to: DiscountApplication
+  kind: has_many
+  via: discountApplications
+- from: Blog
+  to: Article
+  kind: has_many
+  via: articles
+- from: Article
+  to: Blog
+  kind: belongs_to
+  via: blog
+- from: Article
+  to: ArticleAuthor
+  kind: has_one
+  via: authorV2
+- from: Article
+  to: Comment
+  kind: has_many
+  via: comments
+- from: Menu
+  to: MenuItem
+  kind: has_many
+  via: items
+- from: Metaobject
+  to: MetaobjectField
+  kind: has_many
+  via: fields
+- from: Shop
+  to: ShopPolicy
+  kind: has_one
+  via: privacyPolicy
+- from: Shop
+  to: ShopPolicy
+  kind: has_one
+  via: termsOfService
+- from: Shop
+  to: ShopPolicy
+  kind: has_one
+  via: refundPolicy
+- from: Shop
+  to: ShopPolicy
+  kind: has_one
+  via: shippingPolicy
+- from: Shop
+  to: Domain
+  kind: has_one
+  via: primaryDomain
+- from: Shop
+  to: PaymentSettings
+  kind: has_one
+  via: paymentSettings
+polymorphic_attachment:
+  Metafield:
+    kind: has_many
+    attaches_to: [Article, Blog, Cart, Collection, Company, CompanyLocation, Customer, Location, Market,
+      Order, Page, Product, ProductVariant, SellingPlan, Shop]
+    via: metafields
+    note: 15 object types implement HasMetafields, making metafields the schema's universal extension point
+ucp_object_model:
+  note: >-
+    The UCP/MCP surface exposes its own cart, checkout and order objects whose JSON Schemas are hosted by
+    the protocol, not by OLIPOP. They overlap the GraphQL model but are not identical - most notably UCP has
+    a first-class Checkout object where the Storefront schema models checkout as a prepared and submitted Cart.
+  schemas:
+  - https://ucp.dev/2026-04-08/schemas/shopping/cart.json
+  - https://ucp.dev/2026-04-08/schemas/shopping/checkout.json
+  - https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json
+  - https://ucp.dev/2026-04-08/schemas/shopping/discount.json
+  - https://ucp.dev/2026-04-08/schemas/shopping/catalog_search.json
+  - https://ucp.dev/2026-04-08/schemas/shopping/catalog_lookup.json
+  crosswalk: mcp/olipop-tool-crosswalk.yml

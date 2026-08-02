@@ -1,0 +1,140 @@
+generated: '2026-07-31'
+method: searched
+source: https://drinkolipop.com/llms.txt
+also_from:
+- https://drinkolipop.com/robots.txt
+- https://drinkolipop.com/.well-known/ucp
+- https://ucp.dev/2026-04-08/services/shopping/mcp.openrpc.json
+- graphql/olipop-storefront.graphql
+notes: >-
+  Cross-cutting request/response semantics for the three surfaces OLIPOP serves on drinkolipop.com. The
+  provider publishes these rules itself in /llms.txt and /agents.md rather than in a developer portal.
+authentication:
+  style: surface-dependent
+  summary: none for catalog JSON; X-Shopify-Storefront-Access-Token header for Storefront GraphQL;
+    UCP-Agent platform profile for the MCP commerce endpoint; OIDC authorization code + PKCE for customers
+  artifact: authentication/olipop-authentication.yml
+idempotency:
+  supported: true
+  mechanism: request-metadata key mapped to an HTTP header
+  header: Idempotency-Key
+  meta_key: idempotency-key
+  format: uuid
+  scope: per UCP/MCP method invocation
+  required_on:
+  - complete_checkout
+  - cancel_checkout
+  - cancel_cart
+  optional_on:
+  - create_checkout
+  - update_checkout
+  - create_cart
+  - update_cart
+  - search_catalog
+  - lookup_catalog
+  - get_product
+  - get_cart
+  - get_checkout
+  - get_order
+  retention: not published
+  description: >-
+    The UCP shopping service schema that OLIPOP's own /.well-known/ucp merchant profile declares defines
+    meta.idempotency-key as a UUID "unique key for retry safety" that maps to the HTTP Idempotency-Key
+    header, and makes it REQUIRED on the three destructive/terminal methods. This is a real idempotency
+    contract on the endpoint OLIPOP serves, not an inference.
+  source: https://ucp.dev/2026-04-08/services/shopping/mcp.openrpc.json
+  not_applicable_to:
+  - surface: Storefront GraphQL
+    reason: Shopify Storefront mutations carry no idempotency key; retry safety is achieved by re-reading
+      the cart and reconciling line items
+agent_identity:
+  supported: true
+  header: UCP-Agent
+  meta_key: ucp-agent.profile
+  required: true
+  description: Every UCP/MCP call must carry a URL to the calling platform's own UCP profile document.
+    Anonymous calls fail closed with JSON-RPC -32001 invalid_profile_url.
+buyer_context:
+  meta_keys: [context.address_country, context.currency]
+  description: Pass buyer country and currency for accurate pricing and availability.
+  graphql_equivalent: '@inContext(country:, language:) directive'
+  source: https://drinkolipop.com/llms.txt
+human_in_the_loop:
+  required: true
+  applies_to: [complete_checkout, any payment authorization]
+  rule: >-
+    Agents must not complete payment without explicit, contemporaneous buyer consent. Where an agent cannot
+    obtain approval at the moment of payment, the store instructs it to route the purchase through the Shop
+    skill (https://shop.app/SKILL.md) and Shop Pay instead. /robots.txt restates this as a prohibition on
+    scripted form fills, browser automation and end-to-end flows that finalize payment.
+  sources: [https://drinkolipop.com/llms.txt, https://drinkolipop.com/robots.txt]
+pagination:
+- surface: Storefront GraphQL
+  style: cursor
+  params: [first, last, after, before]
+  response_fields: [edges, node, cursor, pageInfo.hasNextPage, pageInfo.hasPreviousPage,
+    pageInfo.startCursor, pageInfo.endCursor]
+  spec: GraphQL Cursor Connections
+- surface: product JSON
+  style: page-and-limit
+  params: [page, limit]
+  default_limit: 30
+  max_limit: 250
+  response_fields: [products]
+  note: limit and page are Shopify storefront JSON conventions; verified live with ?limit=1
+rate_limiting:
+  documented: true
+  mcp:
+    scope: per IP
+    signal: HTTP 429
+    guidance: back off on 429 responses
+    published_limit: not disclosed
+  graphql:
+    model: query cost
+    response_field: extensions.cost.requestedQueryCost
+    note: observed on live responses; Shopify Storefront applies a calculated-cost leaky bucket
+  source: https://drinkolipop.com/llms.txt
+error_envelope:
+- surface: UCP/MCP
+  format: JSON-RPC 2.0 error object
+  fields: [jsonrpc, id, error.code, error.message, error.data.code, error.data.content, error.data.continue_url]
+  artifact: errors/olipop-problem-types.yml
+- surface: Storefront GraphQL
+  format: GraphQL errors array plus typed userErrors on mutation payloads
+  fields:
+  - 'errors[].message'
+  - 'errors[].extensions.code'
+  - 'data.<mutation>.userErrors[].field'
+  - 'data.<mutation>.userErrors[].message'
+  - 'data.<mutation>.userErrors[].code'
+rfc9457_problem_details: false
+versioning:
+- surface: UCP/MCP
+  scheme: dated protocol version negotiated via /.well-known/ucp
+  current: '2026-04-08'
+  supported: ['2026-04-08', '2026-01-23']
+- surface: Storefront GraphQL
+  scheme: dated version in the URL path
+  current_in_use: '2025-07'
+  latest_available: '2026-07'
+  discovery_field: publicApiVersions
+  artifact: lifecycle/olipop-lifecycle.yml
+request_tracing:
+  request_id_header: not published
+  note: no documented correlation-id convention on any OLIPOP surface
+metadata:
+  graphql: metafields and metaobjects (metafield, metafields, metaobject, metaobjects fields)
+  ucp: cart and checkout objects accept free-form attributes per the UCP cart/checkout schemas
+discovery:
+  entry_points:
+  - /llms.txt
+  - /agents.md
+  - /robots.txt
+  - /.well-known/ucp
+  - /sitemap_agentic_discovery.xml
+cross_links:
+  errors: errors/olipop-problem-types.yml
+  lifecycle: lifecycle/olipop-lifecycle.yml
+  authentication: authentication/olipop-authentication.yml
+  scopes: scopes/olipop-scopes.yml
+  agentic_access: agentic-access/olipop-agentic-access.yml

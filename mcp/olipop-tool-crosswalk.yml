@@ -1,0 +1,149 @@
+generated: '2026-07-31'
+method: derived
+source: mcp/olipop-mcp.yml + graphql/olipop-storefront.graphql
+notes: >-
+  OLIPOP publishes no OpenAPI, so this crosswalk binds each UCP/MCP tool to the Storefront GraphQL
+  field(s) that back the same capability, plus the unauthenticated product JSON endpoints its own
+  /llms.txt documents. The three surfaces are overlapping but NOT identical projections of one commerce
+  core: the MCP surface is the only one with a checkout/order object model, and the GraphQL surface is the
+  only one with content (blogs, pages, menus, metaobjects) and customer-account operations. Because the
+  live MCP tools/list is gated on a registered UCP platform profile, bindings below are mapped by
+  name/semantics against the OpenRPC schema OLIPOP's own merchant profile declares, and confidence is set
+  honestly rather than optimistically.
+surfaces:
+  openapi:
+    present: false
+    note: no OpenAPI or Swagger document is published on any OLIPOP host
+  graphql:
+    endpoint: https://drinkolipop.com/api/2025-07/graphql.json
+    artifact: graphql/olipop-storefront.graphql
+    introspection: open
+    note: anonymous introspection returned the full schema (422 types, 35 queries, 41 mutations); reads and
+      writes of real data still require a storefront access token, and customer operations a customer token
+  mcp:
+    endpoint: https://drinkolipop.com/api/ucp/mcp
+    artifact: mcp/olipop-mcp.yml
+    tools_list: gated
+    note: anonymous tools/list returns JSON-RPC -32001 invalid_profile_url; meta["ucp-agent"].profile required
+  json:
+    endpoints:
+    - '/products.json'
+    - '/products/{handle}.json'
+    - '/collections/{handle}/products.json'
+    - '/search?q={query}&type=product'
+    - '/sitemap.xml'
+    auth: none
+    note: documented by the store's own /llms.txt and /agents.md as the read-only browsing surface
+crosswalk:
+- tool: get_product
+  category: catalog
+  graphql: [product, productByHandle]
+  json: ['/products/{handle}.json']
+  binding: graphql
+  confidence: high
+- tool: search_catalog
+  category: catalog
+  graphql: [search, products, predictiveSearch]
+  json: ['/search?q={query}&type=product', '/products.json']
+  binding: graphql
+  confidence: medium
+  note: UCP search_request supports buyer context (country, currency) that the Storefront query fields
+    express through @inContext directives rather than arguments, so the mapping is semantic not 1:1
+- tool: lookup_catalog
+  category: catalog
+  graphql: [nodes, products]
+  json: ['/products.json']
+  binding: graphql
+  confidence: medium
+  note: batch identifier lookup maps to nodes(ids:) for GIDs; there is no batch-by-SKU Storefront field
+- tool: create_cart
+  category: cart
+  graphql: [cartCreate]
+  binding: graphql
+  confidence: high
+- tool: get_cart
+  category: cart
+  graphql: [cart]
+  binding: graphql
+  confidence: high
+- tool: update_cart
+  category: cart
+  graphql: [cartLinesAdd, cartLinesUpdate, cartLinesRemove, cartAttributesUpdate, cartNoteUpdate,
+    cartDiscountCodesUpdate, cartGiftCardCodesAdd, cartBuyerIdentityUpdate]
+  binding: graphql
+  confidence: medium
+  note: one UCP tool fans out to eight granular Storefront mutations
+- tool: create_checkout
+  category: checkout
+  graphql: [cartCreate, cartBuyerIdentityUpdate]
+  binding: graphql
+  confidence: low
+  note: the Storefront API has no Checkout object in this version - checkout is modelled as a Cart that is
+    prepared and submitted, so UCP's checkout lifecycle has no clean GraphQL analogue
+- tool: get_checkout
+  category: checkout
+  graphql: [cart, cartCompletionAttempt]
+  binding: graphql
+  confidence: low
+- tool: update_checkout
+  category: fulfillment
+  graphql: [cartDeliveryAddressesUpdate, cartDeliveryAddressesAdd, cartSelectedDeliveryOptionsUpdate,
+    cartBuyerIdentityUpdate]
+  binding: graphql
+  confidence: medium
+- tool: complete_checkout
+  category: checkout
+  graphql: [cartPrepareForCompletion, cartSubmitForCompletion]
+  binding: graphql
+  confidence: medium
+  note: requires meta.idempotency-key on the MCP side and contemporaneous human buyer approval on both
+- tool: get_order
+  category: order
+  graphql: [customer]
+  binding: graphql
+  confidence: low
+  note: Storefront exposes orders only under customer(customerAccessToken:), so this is a gated analogue
+    rather than a public equivalent
+mcp_only:
+- tool: cancel_cart
+  reason: the Storefront GraphQL API has no cart-delete mutation; a cart is abandoned, not cancelled
+- tool: cancel_checkout
+  reason: no Checkout object exists in the Storefront GraphQL schema, so there is nothing to cancel
+graphql_only:
+- capability: content
+  fields: [article, articles, blog, blogByHandle, blogs, page, pageByHandle, pages, menu, metaobject,
+    metaobjects, urlRedirects, sitemap]
+  reason: UCP shopping covers commerce objects only; blogs, pages, navigation menus and metaobjects have
+    no UCP tool
+- capability: merchandising
+  fields: [collection, collections, collectionByHandle, productRecommendations, productTags, productTypes]
+  reason: collection browsing and recommendations are Storefront-only concepts
+- capability: shop-metadata
+  fields: [shop, localization, locations, paymentSettings, publicApiVersions, shopPayInstallmentsPricing]
+  reason: shop configuration and API version discovery are not part of the UCP shopping service
+- capability: customer-accounts
+  fields: [customerCreate, customerUpdate, customerRecover, customerReset, customerResetByUrl,
+    customerActivate, customerActivateByUrl, customerAccessTokenCreate, customerAccessTokenCreateWithMultipass,
+    customerAccessTokenRenew, customerAccessTokenDelete, customerAddressCreate, customerAddressUpdate,
+    customerAddressDelete, customerDefaultAddressUpdate]
+  reason: account lifecycle is handled by Shopify customer accounts (OIDC) rather than by UCP tools
+- capability: cart-internals
+  fields: [cartMetafieldsSet, cartMetafieldDelete, cartClone, cartRemovePersonalData, cartPaymentUpdate,
+    cartDeliveryAddressesRemove, cartDeliveryAddressesReplace, cartGiftCardCodesRemove, cartGiftCardCodesUpdate,
+    cartBillingAddressUpdate, shopPayPaymentRequestSessionCreate, shopPayPaymentRequestSessionSubmit]
+  reason: fine-grained cart and Shop Pay session operations with no coarse UCP tool equivalent
+json_only:
+- capability: bulk-catalog-read
+  endpoints: ['/products.json', '/collections/{handle}/products.json']
+  reason: unauthenticated paginated catalog dump with no token requirement - the only OLIPOP commerce
+    surface an agent can read with zero enrollment
+coverage:
+  mcp_tools_declared: 13
+  mcp_tools_named_in_llms_txt: 5
+  mcp_tools_bound_to_graphql: 11
+  mcp_only: 2
+  graphql_query_fields: 35
+  graphql_mutation_fields: 41
+  graphql_fields_with_a_tool: 22
+  graphql_only_fields: 54
+  json_endpoints: 5

@@ -1,0 +1,103 @@
+generated: '2026-07-31'
+method: derived
+source: mcp/olipop-mcp.yml + graphql/olipop-storefront.graphql + live probe responses
+format: jsonrpc-2.0
+notes: >-
+  OLIPOP publishes no error reference and no RFC 9457 problem+json surface. This catalog records the error
+  envelopes actually returned by the two machine-readable surfaces on drinkolipop.com, including one
+  JSON-RPC error observed verbatim during this enrichment pass. Codes NOT observed live are not invented:
+  only the envelope shape and the reserved JSON-RPC ranges are documented.
+envelopes:
+- surface: UCP / MCP
+  media_type: application/json
+  shape:
+    jsonrpc: '2.0'
+    id: <request id>
+    error:
+      code: <integer>
+      message: <string>
+      data:
+        code: <machine-readable string>
+        content: <human-readable string>
+        continue_url: <url the buyer can be handed off to>
+  note: the data.continue_url field is a genuinely useful agent affordance - it hands the flow back to a
+    human-usable storefront URL when the agent cannot proceed
+- surface: Storefront GraphQL
+  media_type: application/json
+  shape:
+    errors: [{message: <string>, extensions: {code: <string>}}]
+    data:
+      '<mutation>':
+        userErrors: [{field: [<path>], message: <string>, code: <enum>}]
+  note: Storefront mutations return typed userErrors payloads (CartUserError, CustomerUserError and
+    siblings, all implementing the DisplayableError interface) alongside the transport-level errors array
+problems:
+- surface: ucp-mcp
+  code: -32001
+  data_code: invalid_profile_url
+  title: UCP discovery failed
+  detail: 'Unable to fetch agent profile: Missing profile uri'
+  http_status: 422
+  observed: true
+  observed_on: '2026-07-31'
+  remediation: >-
+    Supply meta["ucp-agent"].profile (or the UCP-Agent HTTP header) with a resolvable URL to the calling
+    platform's own UCP profile document before invoking any method, including tools/list.
+  source_operation: 'https://drinkolipop.com/api/ucp/mcp#tools/list'
+- surface: ucp-mcp
+  code: -32700
+  title: Parse error
+  observed: false
+  note: reserved by JSON-RPC 2.0
+- surface: ucp-mcp
+  code: -32600
+  title: Invalid Request
+  observed: false
+  note: reserved by JSON-RPC 2.0
+- surface: ucp-mcp
+  code: -32601
+  title: Method not found
+  observed: false
+  note: reserved by JSON-RPC 2.0
+- surface: ucp-mcp
+  code: -32602
+  title: Invalid params
+  observed: false
+  note: reserved by JSON-RPC 2.0
+- surface: ucp-mcp
+  code: -32603
+  title: Internal error
+  observed: false
+  note: reserved by JSON-RPC 2.0
+- surface: http
+  status: 404
+  title: Not Found
+  observed: true
+  observed_on: '2026-07-31'
+  detail: Shopify storefront 404 HTML page
+  source_operation: '/.well-known/security.txt, /.well-known/agent-card.json, /.well-known/agent.json,
+    /.well-known/api-catalog, /.well-known/ai-plugin.json'
+- surface: http
+  status: 429
+  title: Too Many Requests
+  observed: false
+  documented: true
+  detail: The MCP endpoint is rate-limited per IP; agents are instructed to back off on 429 responses.
+  source_operation: https://drinkolipop.com/llms.txt
+error_type_families:
+  graphql_error_interface: DisplayableError
+  graphql_user_error_types:
+  - CartOperationError
+  - CartUserError
+  - CompletionError
+  - CustomerUserError
+  - MetafieldDeleteUserError
+  - MetafieldsSetUserError
+  - SubmissionError
+  - UserError
+  - UserErrorsShopPayPaymentRequestSessionUserErrors
+  note: enumerated verbatim from the introspected schema in graphql/olipop-storefront.graphql
+rfc9457: false
+docs: null
+x-evidence:
+  fetched: '2026-07-31'

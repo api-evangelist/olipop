@@ -1,0 +1,115 @@
+generated: '2026-07-31'
+method: searched
+source: live probes of drinkolipop.com discovery surfaces
+notes: >-
+  Cross-cutting standards conformance for the OLIPOP storefront. Nearly all of the conformance here is
+  inherited from the Shopify platform, but it is served from OLIPOP's own domain and declared by OLIPOP's
+  own merchant profile and agent instructions, so it is a real posture for anyone integrating with
+  drinkolipop.com. OLIPOP publishes no certifications or compliance program of its own, so no Compliance
+  pointer is emitted.
+standards:
+- id: ucp-2026-04-08
+  name: Universal Commerce Protocol (shopping service)
+  conforms: true
+  evidence: /.well-known/ucp declares version 2026-04-08 (and 2026-01-23) with the dev.ucp.shopping service
+    over MCP and eight capabilities
+  source: https://drinkolipop.com/.well-known/ucp
+- id: mcp
+  name: Model Context Protocol
+  conforms: true
+  evidence: JSON-RPC 2.0 MCP endpoint live at https://drinkolipop.com/api/ucp/mcp; tools/list is gated on a
+    UCP platform agent profile
+  source: https://drinkolipop.com/api/ucp/mcp
+- id: openrpc-1.3.2
+  name: OpenRPC
+  conforms: true
+  evidence: the merchant profile names an OpenRPC 1.3.2 document as the schema for its MCP service
+  source: https://ucp.dev/2026-04-08/services/shopping/mcp.openrpc.json
+- id: graphql
+  name: GraphQL
+  conforms: true
+  evidence: full anonymous introspection of the Storefront endpoint returned 422 types, 35 queries and 41
+    mutations
+  source: graphql/olipop-storefront.graphql
+- id: graphql-cursor-connections
+  name: GraphQL Cursor Connections Specification
+  conforms: true
+  evidence: connection types expose edges/node/cursor and pageInfo with hasNextPage/endCursor
+  source: graphql/olipop-storefront.graphql
+- id: oidc-discovery
+  name: OpenID Connect Discovery 1.0
+  conforms: true
+  evidence: /.well-known/openid-configuration returns issuer, authorization_endpoint, token_endpoint,
+    jwks_uri, RS256 id_token signing and a claims_supported list
+  source: well-known/olipop-openid-configuration.json
+- id: rfc8414
+  name: OAuth 2.0 Authorization Server Metadata
+  conforms: true
+  evidence: /.well-known/oauth-authorization-server returns the metadata document (identical payload to the
+    OIDC discovery document)
+  source: well-known/olipop-oauth-authorization-server.json
+- id: rfc7636
+  name: OAuth 2.0 PKCE
+  conforms: true
+  evidence: code_challenge_methods_supported = [S256]
+  source: well-known/olipop-openid-configuration.json
+- id: jsonrpc-2.0
+  name: JSON-RPC 2.0
+  conforms: true
+  evidence: the MCP endpoint returns well-formed jsonrpc/id/error envelopes, observed error code -32001
+  source: errors/olipop-problem-types.yml
+- id: idempotency-key
+  name: Idempotency-Key request header (draft-ietf-httpapi-idempotency-key-header)
+  conforms: true
+  evidence: UCP meta.idempotency-key maps to the Idempotency-Key HTTP header and is required on
+    complete_checkout, cancel_checkout and cancel_cart
+  source: conventions/olipop-conventions.yml
+- id: llms-txt
+  name: llms.txt
+  conforms: true
+  evidence: first-party /llms.txt served 200 with agent instructions; mirrored at /agents.md and referenced
+    from /robots.txt and /sitemap_agentic_discovery.xml
+  source: llms/olipop-llms.txt
+- id: rfc8615
+  name: Well-Known URIs
+  conforms: true
+  evidence: /.well-known/ucp, /.well-known/openid-configuration and /.well-known/oauth-authorization-server
+    all return 200
+  source: well-known/olipop-well-known.yml
+- id: sitemaps-0.9
+  name: Sitemaps XML 0.9
+  conforms: true
+  evidence: sitemap index at /sitemap.xml plus a dedicated /sitemap_agentic_discovery.xml
+  source: https://drinkolipop.com/sitemap.xml
+- id: a2a
+  name: A2A Agent Card
+  conforms: false
+  evidence: both /.well-known/agent-card.json and /.well-known/agent.json return 404
+- id: openapi
+  name: OpenAPI
+  conforms: false
+  evidence: no OpenAPI or Swagger document found on any OLIPOP host after probing /openapi.json,
+    /openapi.yaml, /swagger.json, /api-docs, /docs and /redoc
+- id: asyncapi
+  name: AsyncAPI
+  conforms: false
+  evidence: no public event, streaming or webhook surface is published for the storefront
+- id: rfc9457
+  name: Problem Details for HTTP APIs
+  conforms: false
+  evidence: errors use JSON-RPC and GraphQL envelopes, not application/problem+json
+- id: rfc9116
+  name: security.txt
+  conforms: false
+  evidence: /.well-known/security.txt returns 404
+- id: rfc9727
+  name: API Catalog well-known URI
+  conforms: false
+  evidence: /.well-known/api-catalog returns 404
+compliance_program:
+  published: false
+  note: no trust center, certification list or compliance page was found on drinkolipop.com; the site's
+    published legal surface is limited to privacy policy, terms of service, refund policy, a CCPA request
+    form, an accessibility statement and a California Transparency in Supply Chains Act disclosure
+x-evidence:
+  fetched: '2026-07-31'

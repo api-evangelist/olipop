@@ -1,0 +1,153 @@
+generated: '2026-07-31'
+method: searched
+status: published
+source: https://drinkolipop.com/.well-known/ucp
+docs: https://drinkolipop.com/agents.md
+server:
+  name: olipop-ucp-shopping
+  transport: http
+  protocol: MCP JSON-RPC 2.0
+  url: https://drinkolipop.com/api/ucp/mcp
+  canonical_url: https://olipop-store.myshopify.com/api/ucp/mcp
+  vendor: Shopify (Universal Commerce Protocol native)
+  first_party: true
+  notes: >-
+    The MCP endpoint is not a bespoke OLIPOP server; it is the Shopify-native Universal Commerce Protocol
+    shopping service served on OLIPOP's own domain and declared by OLIPOP's own /.well-known/ucp merchant
+    profile, /llms.txt, /agents.md and /robots.txt.
+protocol:
+  name: Universal Commerce Protocol
+  spec: https://ucp.dev/2026-04-08/specification/overview/
+  current_version: '2026-04-08'
+  supported_versions:
+  - '2026-04-08'
+  - '2026-01-23'
+  service: dev.ucp.shopping
+  schema: https://ucp.dev/2026-04-08/services/shopping/mcp.openrpc.json
+  transports:
+  - mcp
+  - embedded
+capabilities:
+- dev.ucp.shopping.checkout
+- dev.ucp.shopping.cart
+- dev.ucp.shopping.fulfillment
+- dev.ucp.shopping.discount
+- dev.ucp.shopping.order
+- dev.ucp.shopping.catalog.search
+- dev.ucp.shopping.catalog.lookup
+- dev.shopify.catalog
+payment_handlers:
+- id: gpay
+  family: com.google.pay
+  version: '2026-01-11'
+  merchant_name: OLIPOP
+  merchant_origin: drinkolipop.com
+  card_networks: [VISA, MASTERCARD, AMEX, DISCOVER]
+- id: shopify.card
+  family: dev.shopify.card
+  version: '2026-01-15'
+  card_brands: [visa, master, american_express, discover, diners_club]
+- id: shop_pay
+  family: dev.shopify.shop_pay
+  version: '2026-04-08'
+introspection:
+  tools_list_attempted: true
+  tools_list_status: gated
+  http_status: 422
+  jsonrpc_error_code: -32001
+  jsonrpc_error_message: UCP discovery failed
+  jsonrpc_error_data_code: invalid_profile_url
+  detail: >-
+    An anonymous MCP tools/list call is rejected because UCP requires meta["ucp-agent"].profile - a URL to
+    the calling platform's own registered UCP profile document (mapped to the HTTP UCP-Agent header). The
+    live tool schemas therefore require an enrolled agent platform. The tool list below is NOT guessed: it
+    is the OpenRPC contract that OLIPOP's own merchant profile names as the schema for this service, with
+    the five tool names the store's /llms.txt calls out explicitly flagged.
+tools:
+- name: search_catalog
+  description: Search for products in the catalog
+  params: [meta, catalog]
+  named_in_llms_txt: true
+  input_schema: https://ucp.dev/2026-04-08/schemas/shopping/catalog_search.json#/$defs/search_request
+- name: lookup_catalog
+  description: Batch lookup products or variants by identifier
+  params: [meta, catalog]
+  named_in_llms_txt: false
+  input_schema: https://ucp.dev/2026-04-08/schemas/shopping/catalog_lookup.json#/$defs/lookup_request
+- name: get_product
+  description: Get product details
+  params: [meta, catalog]
+  named_in_llms_txt: false
+  input_schema: https://ucp.dev/2026-04-08/schemas/shopping/catalog_lookup.json#/$defs/get_product_request
+- name: create_cart
+  description: Create a cart
+  params: [meta, cart]
+  named_in_llms_txt: true
+  input_schema: https://ucp.dev/2026-04-08/schemas/shopping/cart.json
+- name: get_cart
+  description: Get cart
+  params: [meta, id]
+  named_in_llms_txt: false
+- name: update_cart
+  description: Update cart
+  params: [meta, id, cart]
+  named_in_llms_txt: false
+  input_schema: https://ucp.dev/2026-04-08/schemas/shopping/cart.json
+- name: cancel_cart
+  description: Cancel cart
+  params: [meta, id]
+  named_in_llms_txt: false
+  idempotency_key_required: true
+- name: create_checkout
+  description: Create a checkout
+  params: [meta, checkout]
+  named_in_llms_txt: true
+  input_schema: https://ucp.dev/2026-04-08/schemas/shopping/checkout.json
+- name: get_checkout
+  description: Get checkout
+  params: [meta, id]
+  named_in_llms_txt: false
+- name: update_checkout
+  description: Update checkout (shipping address and method)
+  params: [meta, id, checkout]
+  named_in_llms_txt: true
+  input_schema: https://ucp.dev/2026-04-08/schemas/shopping/checkout.json
+- name: complete_checkout
+  description: Complete checkout and place order
+  params: [meta, id, checkout]
+  named_in_llms_txt: true
+  idempotency_key_required: true
+  human_approval_required: true
+- name: cancel_checkout
+  description: Cancel checkout
+  params: [meta, id]
+  named_in_llms_txt: false
+  idempotency_key_required: true
+- name: get_order
+  description: Get order
+  params: [meta, id]
+  named_in_llms_txt: false
+request_meta:
+  required:
+  - key: ucp-agent.profile
+    http_header: UCP-Agent
+    description: URL to the calling platform's UCP profile document
+  optional:
+  - key: idempotency-key
+    http_header: Idempotency-Key
+    format: uuid
+    description: Unique key for retry safety; REQUIRED on complete_checkout, cancel_checkout and cancel_cart
+rules:
+  human_approval: >-
+    Agents must not complete payment without explicit, contemporaneous buyer consent. Both /llms.txt and
+    /robots.txt state this as a hard invariant.
+  rate_limits: The MCP endpoint is rate-limited per IP; agents must back off on 429.
+  buyer_context: Pass context.address_country and context.currency for accurate pricing and availability.
+  recommended_alternative: https://shop.app/SKILL.md (the Shop skill, for personal shopping agents)
+x-evidence:
+  fetched: '2026-07-31'
+  probes:
+  - {url: 'https://drinkolipop.com/.well-known/ucp', http_status: 200, content_type: application/json}
+  - {url: 'https://drinkolipop.com/api/ucp/mcp', method: POST, body: 'tools/list', http_status: 422}
+  - {url: 'https://ucp.dev/2026-04-08/services/shopping/mcp.openrpc.json', http_status: 200, openrpc: 1.3.2}
+  - {url: 'https://drinkolipop.com/llms.txt', http_status: 200}

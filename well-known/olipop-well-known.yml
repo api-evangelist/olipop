@@ -1,0 +1,66 @@
+generated: '2026-07-31'
+method: searched
+source: live probes of https://drinkolipop.com/.well-known/*
+host: https://drinkolipop.com
+notes: >-
+  The OLIPOP storefront runs on Shopify. Its /.well-known/ surface is small but real and materially
+  agent-relevant: a Universal Commerce Protocol merchant profile, plus OIDC/OAuth 2.0 authorization server
+  metadata for Shopify customer accounts scoped to this shop (shop id 3466100806). There is no security.txt,
+  no api-catalog, no ai-plugin.json and no A2A agent card at either the canonical or legacy path.
+documents:
+- path: /.well-known/ucp
+  status: 200
+  content_type: application/json
+  file: olipop-ucp.json
+  spec: Universal Commerce Protocol merchant profile
+  notes: declares UCP versions 2026-04-08 (current) and 2026-01-23, the dev.ucp.shopping service over MCP,
+    eight shopping capabilities, and three payment handlers
+- path: /.well-known/ucp/2026-04-08
+  status: 200
+  content_type: application/json
+  notes: version-pinned merchant profile
+- path: /.well-known/openid-configuration
+  status: 200
+  content_type: application/json
+  file: olipop-openid-configuration.json
+  spec: OpenID Connect Discovery 1.0
+  notes: issuer https://shopify.com/authentication/3466100806 (Shopify customer accounts for this shop)
+- path: /.well-known/oauth-authorization-server
+  status: 200
+  content_type: application/json
+  file: olipop-oauth-authorization-server.json
+  spec: RFC 8414 OAuth 2.0 Authorization Server Metadata
+  notes: byte-identical to the openid-configuration document
+- path: /.well-known/security.txt
+  status: 404
+  spec: RFC 9116
+- path: /.well-known/api-catalog
+  status: 404
+  spec: RFC 9727
+- path: /.well-known/ai-plugin.json
+  status: 404
+- path: /.well-known/agent-card.json
+  status: 404
+  spec: A2A 1.0.0
+- path: /.well-known/agent.json
+  status: 404
+  spec: A2A pre-0.3 legacy path
+adjacent_discovery:
+- path: /llms.txt
+  status: 200
+  file: ../llms/olipop-llms.txt
+  notes: first-party agent instructions
+- path: /agents.md
+  status: 200
+  file: ../llms/olipop-agents.md
+  notes: canonical agent-facing store description; /llms.txt mirrors it
+- path: /robots.txt
+  status: 200
+  notes: carries agent instructions in comments, points at /agents.md, /.well-known/ucp and /api/ucp/mcp,
+    and states that checkout/payment must not be completed without contemporaneous human approval
+- path: /sitemap_agentic_discovery.xml
+  status: 200
+  notes: a dedicated agentic discovery sitemap whose only entry is /agents.md
+x-evidence:
+  fetched: '2026-07-31'
+  method: HTTP GET, following redirects

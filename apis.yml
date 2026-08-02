@@ -1,18 +1,102 @@
 aid: olipop
 name: Olipop
-description: 'Olipop is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+description: >-
+  OLIPOP PBC is an Oakland, California prebiotic soda maker founded in 2018 by Ben Goodwin and David Lester,
+  built around its trademarked OLISMART blend of plant fibers, prebiotics and botanicals, sold across tens of
+  thousands of US retail locations and direct to consumers at drinkolipop.com. It has no traditional developer
+  program, but its Shopify-hosted storefront is a genuinely agent-native commerce surface: the domain publishes
+  a first-party llms.txt and agents.md describing how AI agents may interact with the store, a Universal
+  Commerce Protocol (UCP) merchant profile at /.well-known/ucp, a live UCP/MCP JSON-RPC endpoint at
+  /api/ucp/mcp for catalog search, cart, checkout and order tools, an anonymously introspectable Shopify
+  Storefront GraphQL API, unauthenticated product/collection JSON endpoints, and OpenID Connect discovery for
+  customer accounts. Checkout is explicitly gated on contemporaneous human buyer approval.
+image: https://cdn.shopify.com/s/files/1/0034/6610/0806/files/Website_-_Social_-_Share_-_V1.png?v=1639521624
 url: https://raw.githubusercontent.com/api-evangelist/olipop/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
-specificationVersion: '0.20'
+specificationVersion: '0.21'
 created: '2026-07-31'
 modified: '2026-07-31'
 tags:
-- Company
-apis: []
+- beverage
+- consumer-packaged-goods
+- direct-to-consumer
+- ecommerce
+- retail
+- agent-commerce
+- universal-commerce-protocol
+- mcp
+- graphql
+- shopify
+- prebiotic-soda
+- functional-beverage
+apis:
+- name: OLIPOP Agent Commerce API (UCP over MCP)
+  description: >-
+    Agent-facing commerce surface for the OLIPOP storefront, implementing the Universal Commerce Protocol
+    (UCP) shopping service over MCP JSON-RPC. The merchant profile at /.well-known/ucp declares protocol
+    versions 2026-04-08 and 2026-01-23, the checkout, cart, fulfillment, discount, order and catalog
+    capabilities, and the Google Pay, Shopify Card and Shop Pay payment handlers. The tools/list call is
+    gated on a registered UCP platform agent profile; the tool contract is the OpenRPC schema the profile
+    itself points at.
+  humanURL: https://drinkolipop.com/agents.md
+  baseURL: https://drinkolipop.com/api/ucp/mcp
+  tags:
+  - agent-commerce
+  - universal-commerce-protocol
+  - mcp
+  - checkout
+  - cart
+  - catalog
+  properties:
+  - type: Documentation
+    url: https://drinkolipop.com/agents.md
+  - type: APIReference
+    url: https://ucp.dev/2026-04-08/services/shopping/mcp.openrpc.json
+  - type: MCPServer
+    url: mcp/olipop-mcp.yml
+  - type: ToolCrosswalk
+    url: mcp/olipop-tool-crosswalk.yml
+  - type: WellKnown
+    url: well-known/olipop-ucp.json
+- name: OLIPOP Storefront GraphQL API
+  description: >-
+    Shopify Storefront GraphQL API served on the OLIPOP domain, exposing 35 root query fields and 41
+    mutations across products, collections, search, blogs, pages, menus, metaobjects, localization, cart
+    and customer accounts. Introspection responds anonymously on the storefront host; write and customer
+    operations require a storefront access token or a customer access token.
+  humanURL: https://shopify.dev/docs/api/storefront
+  baseURL: https://drinkolipop.com/api/2025-07/graphql.json
+  tags:
+  - graphql
+  - ecommerce
+  - catalog
+  - cart
+  - storefront
+  properties:
+  - type: GraphQL
+    url: graphql/olipop-storefront.graphql
+  - type: Documentation
+    url: https://shopify.dev/docs/api/storefront
+  - type: DataModel
+    url: data-model/olipop-data-model.yml
+- name: OLIPOP Storefront Product JSON
+  description: >-
+    Unauthenticated read-only JSON endpoints the store's own agent instructions publish for agents that only
+    need to read catalog data - all products, a single product by handle, and the products in a collection -
+    alongside the sitemap and an agentic discovery sitemap that points at /agents.md.
+  humanURL: https://drinkolipop.com/llms.txt
+  baseURL: https://drinkolipop.com/products.json
+  tags:
+  - ecommerce
+  - catalog
+  - json
+  - read-only
+  properties:
+  - type: Documentation
+    url: https://drinkolipop.com/llms.txt
+  - type: LLMsTxt
+    url: llms/olipop-llms.txt
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -20,4 +104,57 @@ maintainers:
   email: info@apis.io
 common:
 - type: Website
-  url: https://forgeglobal.com/olipop_stock/
+  url: https://drinkolipop.com/
+- type: Documentation
+  url: https://drinkolipop.com/agents.md
+- type: Support
+  url: https://drinkolipop.com/pages/contact-us
+- type: HelpCenter
+  url: https://drinkolipop.com/pages/faq
+- type: Blog
+  url: https://drinkolipop.com/blogs/digest
+- type: SignUp
+  url: https://drinkolipop.com/account/login
+- type: TermsOfService
+  url: https://drinkolipop.com/policies/terms-of-service
+- type: PrivacyPolicy
+  url: https://drinkolipop.com/policies/privacy-policy
+- type: LLMsTxt
+  url: llms/olipop-llms.txt
+- type: MCPServer
+  url: mcp/olipop-mcp.yml
+- type: ToolCrosswalk
+  url: mcp/olipop-tool-crosswalk.yml
+- type: GraphQL
+  url: graphql/olipop-storefront.graphql
+- type: WellKnown
+  url: well-known/olipop-well-known.yml
+- type: Authentication
+  url: authentication/olipop-authentication.yml
+- type: OAuthScopes
+  url: scopes/olipop-scopes.yml
+- type: OpenIDConnect
+  url: well-known/olipop-openid-configuration.json
+- type: Conventions
+  url: conventions/olipop-conventions.yml
+- type: Idempotency
+  url: conventions/olipop-conventions.yml
+- type: Conformance
+  url: conformance/olipop-conformance.yml
+- type: Lifecycle
+  url: lifecycle/olipop-lifecycle.yml
+- type: ErrorCatalog
+  url: errors/olipop-problem-types.yml
+- type: DataModel
+  url: data-model/olipop-data-model.yml
+- type: AgenticAccess
+  url: agentic-access/olipop-agentic-access.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: DomainSecurity
+  url: security/olipop-domain-security.yml
+x-enrichment:
+  date: '2026-07-31'
+  status: enriched
+  artifacts_added: 22
+  pass: local-v1

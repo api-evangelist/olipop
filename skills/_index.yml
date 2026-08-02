@@ -1,0 +1,46 @@
+generated: '2026-07-31'
+method: generated
+source: mcp/olipop-mcp.yml + graphql/olipop-storefront.graphql + https://drinkolipop.com/llms.txt
+notes: >-
+  Three packaged agent skills covering the three surfaces OLIPOP serves on drinkolipop.com, ordered by the
+  credential they need: none, a UCP platform profile, a storefront token. Every operation named in these
+  skills was verified against either the OpenRPC schema OLIPOP's merchant profile declares or the
+  introspected GraphQL schema captured in graphql/olipop-storefront.graphql. The provider publishes its own
+  agent instructions at /llms.txt and /agents.md, saved verbatim under llms/ - these skills operationalise
+  those instructions rather than replacing them.
+skills:
+- file: olipop-browse-catalog.md
+  name: Browse the OLIPOP catalog without enrolling
+  surface: json
+  api: https://drinkolipop.com/products.json
+  auth: none
+  operations:
+  - 'GET /products.json'
+  - 'GET /products/{handle}.json'
+  - 'GET /collections/{handle}/products.json'
+  - 'GET /search?q={query}&type=product'
+- file: olipop-agent-purchase.md
+  name: Buy OLIPOP as an agent over UCP/MCP
+  surface: ucp-mcp
+  api: https://drinkolipop.com/api/ucp/mcp
+  auth: UCP-Agent platform profile
+  human_in_the_loop: required
+  operations: [search_catalog, get_product, create_cart, update_cart, create_checkout, update_checkout,
+    complete_checkout, get_order]
+- file: olipop-storefront-graphql.md
+  name: Query the OLIPOP storefront with GraphQL
+  surface: graphql
+  api: https://drinkolipop.com/api/2025-07/graphql.json
+  auth: X-Shopify-Storefront-Access-Token
+  operations: [product, productByHandle, products, collection, collections, search, predictiveSearch,
+    productRecommendations, blog, articles, page, menu, shop, localization, publicApiVersions, cartCreate,
+    cartLinesAdd, cartLinesUpdate]
+provider_published:
+- file: ../llms/olipop-llms.txt
+  name: OLIPOP agent instructions (llms.txt)
+  method: searched
+  source: https://drinkolipop.com/llms.txt
+- file: ../llms/olipop-agents.md
+  name: OLIPOP agent instructions (agents.md)
+  method: searched
+  source: https://drinkolipop.com/agents.md
