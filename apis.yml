@@ -14,7 +14,7 @@ image: https://cdn.shopify.com/s/files/1/0034/6610/0806/files/Website_-_Social_-
 url: https://raw.githubusercontent.com/api-evangelist/olipop/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-specificationVersion: '0.21'
+specificationVersion: '0.23'
 created: '2026-07-31'
 modified: '2026-07-31'
 tags:
