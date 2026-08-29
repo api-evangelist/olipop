@@ -10,6 +10,17 @@ description: >-
   /api/ucp/mcp for catalog search, cart, checkout and order tools, an anonymously introspectable Shopify
   Storefront GraphQL API, unauthenticated product/collection JSON endpoints, and OpenID Connect discovery for
   customer accounts. Checkout is explicitly gated on contemporaneous human buyer approval.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://cdn.shopify.com/s/files/1/0034/6610/0806/files/Website_-_Social_-_Share_-_V1.png?v=1639521624
 url: https://raw.githubusercontent.com/api-evangelist/olipop/refs/heads/main/apis.yml
 x-type: company
