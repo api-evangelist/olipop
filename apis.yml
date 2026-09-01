@@ -29,18 +29,18 @@ specificationVersion: '0.23'
 created: '2026-07-31'
 modified: '2026-07-31'
 tags:
-- beverage
-- consumer-packaged-goods
-- direct-to-consumer
+- Beverage
+- Consumer Packaged Goods
+- Direct to Consumer
 - E-Commerce
 - Retail
-- agent-commerce
-- universal-commerce-protocol
+- Agent Commerce
+- Universal Commerce Protocol
 - MCP
-- graphql
-- shopify
+- GraphQL
+- Shopify
 - prebiotic-soda
-- functional-beverage
+- Functional Beverage
 tags_raw:
 - beverage
 - consumer-packaged-goods
@@ -66,11 +66,11 @@ apis:
   humanURL: https://drinkolipop.com/agents.md
   baseURL: https://drinkolipop.com/api/ucp/mcp
   tags:
-  - agent-commerce
-  - universal-commerce-protocol
+  - Agent Commerce
+  - Universal Commerce Protocol
   - MCP
-  - checkout
-  - cart
+  - Checkout
+  - Cart
   - Catalog
   tags_raw:
   - agent-commerce
@@ -99,11 +99,11 @@ apis:
   humanURL: https://shopify.dev/docs/api/storefront
   baseURL: https://drinkolipop.com/api/2025-07/graphql.json
   tags:
-  - graphql
+  - GraphQL
   - E-Commerce
   - Catalog
-  - cart
-  - storefront
+  - Cart
+  - Storefront
   tags_raw:
   - graphql
   - ecommerce
