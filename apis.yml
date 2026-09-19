@@ -43,12 +43,12 @@ specificationVersion: '0.23'
 created: '2026-07-31'
 modified: '2026-07-31'
 tags:
-- Beverage
+- Beverages
 - Consumer Packaged Goods
 - Direct to Consumer
 - E-Commerce
 - Retail
-- Agent Commerce
+- Agentic Commerce
 - Universal Commerce Protocol
 - MCP
 - GraphQL
@@ -80,7 +80,7 @@ apis:
   humanURL: https://drinkolipop.com/agents.md
   baseURL: https://drinkolipop.com/api/ucp/mcp
   tags:
-  - Agent Commerce
+  - Agentic Commerce
   - Universal Commerce Protocol
   - MCP
   - Checkout
