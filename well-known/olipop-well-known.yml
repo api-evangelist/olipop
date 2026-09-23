@@ -2,49 +2,10 @@ generated: '2026-07-31'
 method: searched
 source: live probes of https://drinkolipop.com/.well-known/*
 host: https://drinkolipop.com
-notes: >-
-  The OLIPOP storefront runs on Shopify. Its /.well-known/ surface is small but real and materially
+notes: 'The OLIPOP storefront runs on Shopify. Its /.well-known/ surface is small but real and materially
   agent-relevant: a Universal Commerce Protocol merchant profile, plus OIDC/OAuth 2.0 authorization server
   metadata for Shopify customer accounts scoped to this shop (shop id 3466100806). There is no security.txt,
-  no api-catalog, no ai-plugin.json and no A2A agent card at either the canonical or legacy path.
-documents:
-- path: /.well-known/ucp
-  status: 200
-  content_type: application/json
-  file: olipop-ucp.json
-  spec: Universal Commerce Protocol merchant profile
-  notes: declares UCP versions 2026-04-08 (current) and 2026-01-23, the dev.ucp.shopping service over MCP,
-    eight shopping capabilities, and three payment handlers
-- path: /.well-known/ucp/2026-04-08
-  status: 200
-  content_type: application/json
-  notes: version-pinned merchant profile
-- path: /.well-known/openid-configuration
-  status: 200
-  content_type: application/json
-  file: olipop-openid-configuration.json
-  spec: OpenID Connect Discovery 1.0
-  notes: issuer https://shopify.com/authentication/3466100806 (Shopify customer accounts for this shop)
-- path: /.well-known/oauth-authorization-server
-  status: 200
-  content_type: application/json
-  file: olipop-oauth-authorization-server.json
-  spec: RFC 8414 OAuth 2.0 Authorization Server Metadata
-  notes: byte-identical to the openid-configuration document
-- path: /.well-known/security.txt
-  status: 404
-  spec: RFC 9116
-- path: /.well-known/api-catalog
-  status: 404
-  spec: RFC 9727
-- path: /.well-known/ai-plugin.json
-  status: 404
-- path: /.well-known/agent-card.json
-  status: 404
-  spec: A2A 1.0.0
-- path: /.well-known/agent.json
-  status: 404
-  spec: A2A pre-0.3 legacy path
+  no api-catalog, no ai-plugin.json and no A2A agent card at either the canonical or legacy path.'
 adjacent_discovery:
 - path: /llms.txt
   status: 200
@@ -64,3 +25,36 @@ adjacent_discovery:
 x-evidence:
   fetched: '2026-07-31'
   method: HTTP GET, following redirects
+hosts:
+- host: https://drinkolipop.com
+  documents:
+  - path: /.well-known/ucp
+    status: 200
+    file: olipop-ucp.json
+    content_type: application/json
+  - path: /.well-known/ucp/2026-04-08
+    status: 200
+    content_type: application/json
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: olipop-openid-configuration.json
+    content_type: application/json
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: olipop-oauth-authorization-server.json
+    content_type: application/json
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+x-shape-fix:
+  converted: '2026-08-20'
+  from: documents
+  note: Rewritten into hosts[] -> documents[], the only shape well_known_docs() in score.rb reads. A served
+    .well-known surface recorded in any other shape scores as absent.
