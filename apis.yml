@@ -104,6 +104,9 @@ apis:
     url: mcp/olipop-tool-crosswalk.yml
   - type: WellKnown
     url: well-known/olipop-ucp.json
+  x-surface: platform-generated
+  x-platform: shopify
+  x-platform-surface: ucp
 - name: OLIPOP Storefront GraphQL API
   description: >-
     Shopify Storefront GraphQL API served on the OLIPOP domain, exposing 35 root query fields and 41
@@ -131,6 +134,9 @@ apis:
     url: https://shopify.dev/docs/api/storefront
   - type: DataModel
     url: data-model/olipop-data-model.yml
+  x-surface: platform-generated
+  x-platform: shopify
+  x-platform-surface: storefront-graphql
 - name: OLIPOP Storefront Product JSON
   description: >-
     Unauthenticated read-only JSON endpoints the store's own agent instructions publish for agents that only
@@ -153,6 +159,9 @@ apis:
     url: https://drinkolipop.com/llms.txt
   - type: LLMsTxt
     url: llms/olipop-llms.txt
+  x-surface: platform-generated
+  x-platform: shopify
+  x-platform-surface: storefront-json
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
