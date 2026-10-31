@@ -64,28 +64,110 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-OLIPOP PBC is an Oakland, California prebiotic soda maker founded in 2018 by Ben Goodwin and David Lester.
-It runs no traditional developer program, but its Shopify-hosted storefront at
-[drinkolipop.com](https://drinkolipop.com/) is a genuinely agent-native commerce surface.
+OLIPOP PBC is an Oakland, California prebiotic soda maker founded in 2018 by Ben Goodwin and David Lester, built around its trademarked OLISMART blend of plant fibers, prebiotics and botanicals, sold across tens of thousands of US retail locations and direct to consumers at drinkolipop.com. It has no traditional developer program, but its Shopify-hosted storefront is a genuinely agent-native commerce surface: the domain publishes a first-party llms.txt and agents.md describing how AI agents may interact with the store, a Universal Commerce Protocol (UCP) merchant profile at /.well-known/ucp, a live UCP/MCP JSON-RPC endpoint at /api/ucp/mcp for catalog search, cart, checkout and order tools, an anonymously introspectable Shopify Storefront GraphQL API, unauthenticated product/collection JSON endpoints, and OpenID Connect discovery for customer accounts. Checkout is explicitly gated on contemporaneous human buyer approval.
 
-- Agent instructions: https://drinkolipop.com/agents.md (mirrored at `/llms.txt`)
-- UCP merchant profile: https://drinkolipop.com/.well-known/ucp
-- UCP/MCP commerce endpoint: https://drinkolipop.com/api/ucp/mcp
-- Storefront GraphQL: https://drinkolipop.com/api/2025-07/graphql.json
+**Areas:** Beverages · Consumer Packaged Goods · Direct to Consumer · E-Commerce · Retail · Agentic Commerce · Universal Commerce Protocol · MCP · GraphQL · Shopify · prebiotic-soda · Functional Beverage
 
-## What is captured here
+## Olipop on APIs.io
 
-| Directory | What |
+Everything profiled for Olipop is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/olipop/](https://apis.io/providers/olipop/)** — or go straight to one of the APIs or properties below.
+
+### APIs (3)
+
+- [OLIPOP Agent Commerce API (UCP over MCP)](https://apis.io/apis/olipop/olipop-agent-commerce-api-ucp-over-mcp/) — Agent-facing commerce surface for the OLIPOP storefront, implementing the Universal Commerce Protocol (UCP) shopping service over MCP JSON-RPC. The merchant…
+- [OLIPOP Storefront GraphQL API](https://apis.io/apis/olipop/olipop-storefront-graphql-api/) — Shopify Storefront GraphQL API served on the OLIPOP domain, exposing 35 root query fields and 41 mutations across products, collections, search, blogs,…
+- [OLIPOP Storefront Product JSON](https://apis.io/apis/olipop/olipop-storefront-product-json/) — Unauthenticated read-only JSON endpoints the store's own agent instructions publish for agents that only need to read catalog data - all products, a single…
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [olipop-ucp-shopping](https://apis.io/servers/olipop/olipop-ucp-shopping/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Olipop Agentic Access](https://apis.io/agentic-access/olipop/olipop-agentic-access/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Olipop Authentication](https://apis.io/security/olipop/olipop-authentication/)
+- [Olipop Domain Security](https://apis.io/security/olipop/olipop-domain-security/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Olipop Scopes](https://apis.io/scopes/olipop/olipop-scopes/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://drinkolipop.com/)
+- [Documentation](https://drinkolipop.com/agents.md)
+- [Sign up](https://drinkolipop.com/account/login)
+- [Support](https://drinkolipop.com/pages/contact-us)
+- [Blog](https://drinkolipop.com/blogs/digest)
+- [Terms of service](https://drinkolipop.com/policies/terms-of-service)
+- [Privacy policy](https://drinkolipop.com/policies/privacy-policy)
+
+## API Evangelist rating
+
+**Kin Score 30.0** — thin · rubric 0.24.0 · scored 2026-10-17
+
+| Facet | Score |
 |---|---|
-| `llms/` | The store's own `llms.txt` and `agents.md`, verbatim |
-| `well-known/` | UCP merchant profile, OIDC discovery, OAuth 2.0 AS metadata, plus the misses |
-| `mcp/` | The UCP shopping tool surface and a crosswalk binding it to GraphQL |
-| `graphql/` | Full Storefront schema captured by anonymous introspection |
-| `authentication/`, `scopes/` | The four coexisting auth models and the published OIDC scopes |
-| `conventions/` | Idempotency, pagination, rate limiting, buyer context, human-approval invariant |
-| `agentic-access/` | The provider's own published agent access rules, classified per operation |
-| `skills/` | Three packaged agent skills, one per surface |
-| `conformance/`, `lifecycle/`, `errors/`, `data-model/`, `security/` | Standards posture, versioning, error envelopes, entity graph, domain security |
+| Discoverability | 80.0 |
+| Contract quality | 10.4 |
+| Contract governance | 18.2 |
+| Operational transparency | 0.0 |
+| Developer ergonomics | 37.5 |
+| Access clarity | 34.2 |
 
-No OpenAPI, no AsyncAPI, no A2A agent card, no security.txt, no trust center and no first-party SDKs were
-found — each of those was probed and the miss is recorded rather than filled in.
+**Agent readiness 38.8** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | yes |
+| Reversibility Documented | — |
+| MCP Server | platform (partial credit) |
+| Auth Clarity | served (partial credit) |
+| Idempotency | documented (partial credit) |
+| Error Semantics | derived (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | — |
+| Event Surface Described | — |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | platform (partial credit) |
+
+**Regulatory alignment 34.3** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/olipop/](https://apis.io/providers/olipop/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Olipop: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/olipop/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
